@@ -2,6 +2,8 @@
 
 UAV obstacle avoidance via Control Barrier Functions
 
+**IDEA:**
+Si runna UAV.m e si lascia il workspace intatto. Poi si apre la scena simulink e si clicca play, cosi tutte le posizione sono già state calcolate.
 ## sampler.slx
 Questi blocchi (sampler) sono fatti per estrarre uno alla volta (1 per ogni istante di tempo) le posizioni di robot e ostacolo. L'uscita dei blocchi è un vettore (x(t), y(t), z(t)) che va dato in pasto a translation degli oggetti. Vanno copiati e aggiunti alla scena simulink di animazione.
 
