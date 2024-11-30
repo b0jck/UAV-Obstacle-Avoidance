@@ -27,6 +27,7 @@ axis equal;
 [obs1_x, obs1_y, obs1_z] = generateSphere([Pobs1x(1), Pobs1y(1), Pobs1z(1)], d);
 [obs2_x, obs2_y, obs2_z] = generateSphere([Pobs2x(1), Pobs2y(1), Pobs2z(1)], d);
 [obs3_x, obs3_y, obs3_z] = generateSphere([Pobs3x(1), Pobs3y(1), Pobs3z(1)], d);
+[obs4_x, obs4_y, obs4_z] = generateSphere([Pobs4x(1), Pobs4y(1), Pobs4z(1)], d);
 
 robot_real = surf(robot_real_x, robot_real_y, robot_real_z, ...
     'FaceColor', [0.9290 0.6940 0.1250], 'EdgeColor', 'none', 'FaceAlpha', 0.5);
@@ -37,7 +38,9 @@ obs1 = surf(obs1_x, obs1_y, obs1_z, ...
 obs2= surf(obs2_x, obs2_y, obs2_z, ...
     'FaceColor', 'y', 'EdgeColor', 'none', 'FaceAlpha', 0.9);
 obs3= surf(obs3_x, obs3_y, obs3_z, ...
-    'FaceColor', 'y', 'EdgeColor', 'none', 'FaceAlpha', 0.9);
+    'FaceColor', 'b', 'EdgeColor', 'none', 'FaceAlpha', 0.9);
+obs4= surf(obs4_x, obs4_y, obs4_z, ...
+    'FaceColor', 'g', 'EdgeColor', 'none', 'FaceAlpha', 0.9);
 
 % Trail (tracce) per posizione reale e di riferimento
 trail_real = plot3([], [], [], '-', 'Color', [0.9290 0.6940 0.1250], 'LineWidth', 2);
@@ -73,6 +76,9 @@ for k = 2:length(xd)
 
     [obs3_x, obs3_y, obs3_z] = generateSphere([Pobs3x(k), Pobs3y(k), Pobs3z(k)], d);
     set(obs3, 'XData', obs3_x, 'YData', obs3_y, 'ZData', obs3_z);
+
+    [obs4_x, obs4_y, obs4_z] = generateSphere([Pobs4x(k), Pobs4y(k), Pobs4z(k)], d);
+    set(obs4, 'XData', obs4_x, 'YData', obs4_y, 'ZData', obs4_z);
     
     % Aggiornamento tracce
     x_trail_real = [get(trail_real, 'XData'), xd(k)];
