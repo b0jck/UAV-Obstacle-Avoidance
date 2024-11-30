@@ -5,7 +5,7 @@ clc
 % Use global Parameters to simplify simulation
 global A B K Kp Kd mu d d1 f v Ox Oy a b c Obs alpha 
 
-global Pd Xd Yd Zd Pd_dot Xd_dot Yd_dot Zd_dot Pd_dd s r Ox Oy Oz Ux Uy Uz Ob1 Ob2 Ob3 H
+global Pd Xd Yd Zd Pd_dot Xd_dot Yd_dot Zd_dot Pd_dd s r Ox Oy Oz Ux Uy Uz Ob1 Ob2 Ob3 Ob4 H
 syms Pd Xd Yd Zd Pd_dot Xd_dot Yd_dot Zd_dot Pd_dd s
 
 %% Trajectory Parameters (for feedforward)
@@ -20,9 +20,9 @@ f = pi/4;
 %% Feedforward (eight trajectory)
 
 % Trajectory Reference
-a = 10;
-b = 10;
-c = 7;
+a = 30;
+b = 20;
+c = 16;
 Pd = [Ox + a*sin(f*s); Oy + b*sin(f*s)*cos(f*s); Oz + c*sin(0.5*f*s)];
 
 % First derivative (velocity reference)
@@ -84,7 +84,7 @@ tspan=0:0.05:30;
 [t, x]=ode45(@simulation,tspan,x0);
 
 % Convert data format for plotting
-[~,Xd,Yd,Zd, Ux, Uy, Uz, Ob1, Ob2, Ob3, h] = cellfun(@(t,x) simulation(t,x.'), num2cell(t), num2cell(x,2),'uni',0);
+[~,Xd,Yd,Zd, Ux, Uy, Uz, Ob1, Ob2, Ob3, Ob4, h] = cellfun(@(t,x) simulation(t,x.'), num2cell(t), num2cell(x,2),'uni',0);
 H = cell2mat(h)
 
 %Extracting positions of Obstacle
@@ -99,6 +99,10 @@ Pobs2z = zeros(1, length(Ob2));
 Pobs3x = zeros(1, length(Ob3));
 Pobs3y = zeros(1, length(Ob3));
 Pobs3z = zeros(1, length(Ob3));
+
+Pobs4x = zeros(1, length(Ob4));
+Pobs4y = zeros(1, length(Ob4));
+Pobs4z = zeros(1, length(Ob4));
 
 for i = 1:length(Ob1)
     Px = Ob1{i}(1,:);
@@ -121,6 +125,13 @@ for i = 1:length(Ob1)
     Pobs3x(i) = double(Px);
     Pobs3y(i) = double(Py);
     Pobs3z(i) = double(Pz);
+
+    Px = Ob4{i}(1,:);
+    Py = Ob4{i}(2,:);
+    Pz = Ob4{i}(3,:);
+    Pobs4x(i) = double(Px);
+    Pobs4y(i) = double(Py);
+    Pobs4z(i) = double(Pz);
 end
 
 %% Plotting
@@ -214,7 +225,7 @@ legend('x velocity','y velocity')
 ylim([min([X_dot;Y_dot])-2,max([X_dot;Y_dot])+2])
 
 %% Simulation Function
-function [dx,Xd,Yd,Zd, Ux, Uy, Uz, Ob1, Ob2, Ob3, h] =simulation(t,x)
+function [dx,Xd,Yd,Zd, Ux, Uy, Uz, Ob1, Ob2, Ob3, Ob4, h] =simulation(t,x)
 global A B Pd Pd_dot Pd_dd s Kp Kd Obs ObsDot ObsDotDot mu alpha r f v fo Ox Oy Oz po poPerp a b c 
 
 %Obstacle Angular velocity
@@ -254,14 +265,19 @@ Ob2 = double(Ob2);
 Ob2Dot = double(Ob2Dot);
 Ob2DotDot = double(Ob2DotDot);
 
-%Obstacle 3 Fixed
+%Obstacle 3 Mobile
 Ob3 = [5*sin(fo*t); 6*cos(fo*t); 60];
 Ob3Dot = [5*fo*cos(fo*t); -6*fo*sin(fo*t); 0];
 Ob3DotDot = [-5*fo^2*sin(fo*t); -6*fo^2*cos(fo*t); 0];
 
-Obs = [Ob1 Ob2];
-ObsDot = [Ob1Dot Ob2Dot];
-ObsDotDot = [Ob1DotDot Ob2DotDot];
+%Obstacle 4 Fixed
+Ob4 = [30; 10; 60];
+Ob4Dot = [0; 0; 0];
+Ob4DotDot = [0; 0; 0];
+
+Obs = [Ob1 Ob2 Ob3 Ob4];
+ObsDot = [Ob1Dot Ob2Dot Ob3Dot Ob4Dot];
+ObsDotDot = [Ob1DotDot Ob2DotDot Ob3DotDot Ob4DotDot];
 
 % UAV position and velocity
 Pi = x(1:3);
