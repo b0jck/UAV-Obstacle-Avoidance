@@ -5,7 +5,7 @@ clc
 % Use global Parameters to simplify simulation
 global A B K Kp Kd mu d d1 f v Ox Oy a b c Obs alpha 
 
-global Pd Xd Yd Zd Pd_dot Xd_dot Yd_dot Zd_dot Pd_dd s r Ox Oy Oz Ux Uy Uz Ob1 Ob2 Ob3 Ob4 H
+global Pd Xd Yd Zd Pd_dot Xd_dot Yd_dot Zd_dot Pd_dd s r Ox Oy Oz Ux Uy Uz Ob1 Ob2 Ob3 Ob4 Ob5 Ob6 Ob7 H
 syms Pd Xd Yd Zd Pd_dot Xd_dot Yd_dot Zd_dot Pd_dd s
 
 %% Trajectory Parameters (for feedforward)
@@ -84,8 +84,8 @@ tspan=0:0.05:30;
 [t, x]=ode45(@simulation,tspan,x0);
 
 % Convert data format for plotting
-[~,Xd,Yd,Zd, Ux, Uy, Uz, Ob1, Ob2, Ob3, Ob4, h] = cellfun(@(t,x) simulation(t,x.'), num2cell(t), num2cell(x,2),'uni',0);
-H = cell2mat(h)
+[~,Xd,Yd,Zd, Ux, Uy, Uz, Ob1, Ob2, Ob3, Ob4, Ob5, Ob6, Ob7, h] = cellfun(@(t,x) simulation(t,x.'), num2cell(t), num2cell(x,2),'uni',0);
+H = cell2mat(h);
 
 %Extracting positions of Obstacle
 Pobs1x = zeros(1, length(Ob1));
@@ -103,6 +103,19 @@ Pobs3z = zeros(1, length(Ob3));
 Pobs4x = zeros(1, length(Ob4));
 Pobs4y = zeros(1, length(Ob4));
 Pobs4z = zeros(1, length(Ob4));
+
+Pobs5x = zeros(1, length(Ob5));
+Pobs5y = zeros(1, length(Ob5));
+Pobs5z = zeros(1, length(Ob5));
+
+Pobs6x = zeros(1, length(Ob6));
+Pobs6y = zeros(1, length(Ob6));
+Pobs6z = zeros(1, length(Ob6));
+
+Pobs7x = zeros(1, length(Ob7));
+Pobs7y = zeros(1, length(Ob7));
+Pobs7z = zeros(1, length(Ob7));
+
 
 for i = 1:length(Ob1)
     Px = Ob1{i}(1,:);
@@ -132,6 +145,27 @@ for i = 1:length(Ob1)
     Pobs4x(i) = double(Px);
     Pobs4y(i) = double(Py);
     Pobs4z(i) = double(Pz);
+
+    Px = Ob5{i}(1,:);
+    Py = Ob5{i}(2,:);
+    Pz = Ob5{i}(3,:);
+    Pobs5x(i) = double(Px);
+    Pobs5y(i) = double(Py);
+    Pobs5z(i) = double(Pz);
+
+    Px = Ob6{i}(1,:);
+    Py = Ob6{i}(2,:);
+    Pz = Ob6{i}(3,:);
+    Pobs6x(i) = double(Px);
+    Pobs6y(i) = double(Py);
+    Pobs6z(i) = double(Pz);
+
+    Px = Ob7{i}(1,:);
+    Py = Ob7{i}(2,:);
+    Pz = Ob7{i}(3,:);
+    Pobs7x(i) = double(Px);
+    Pobs7y(i) = double(Py);
+    Pobs7z(i) = double(Pz);
 end
 
 %% Plotting
@@ -188,19 +222,6 @@ zd = cell2mat(Zd);
 
 plot3(xd, yd, zd, 'color', 'b', 'LineWidth', 2)
 
-
-% Extract robot's "trail"
-%[X1, X2, Y1, Y2, Z1, Z2] = border(X,Y,Z,X_dot, Y_dot,Z_dot);
-
-% Plot the two curves that define the trail
-% plot3(X1, Y1, Z1, 'b', 'LineWidth', 1);
-% plot3(X2, Y2, Z2, 'b', 'LineWidth', 1);
-
-% Fill area in between
-% for i=2:length(X1)
-%     plot3([X1(i) X2(i)], [Y1(i) Y2(i)], [Z1(i) Z2(i)], 'b', 'LineWidth', 0.1)
-% end
-
 % Control Effort
 figure(2)
 title('Control Effort')
@@ -225,11 +246,14 @@ legend('x velocity','y velocity')
 ylim([min([X_dot;Y_dot])-2,max([X_dot;Y_dot])+2])
 
 %% Simulation Function
-function [dx,Xd,Yd,Zd, Ux, Uy, Uz, Ob1, Ob2, Ob3, Ob4, h] =simulation(t,x)
-global A B Pd Pd_dot Pd_dd s Kp Kd Obs ObsDot ObsDotDot mu alpha r f v fo Ox Oy Oz po poPerp a b c 
+function [dx,Xd,Yd,Zd, Ux, Uy, Uz, Ob1, Ob2, Ob3, Ob4, Ob5, Ob6, Ob7, h] =simulation(t,x)
+global A B Pd Pd_dot Pd_dd s Kp Kd Obs ObsDot ObsDotDot mu alpha r f v fo Ox Oy Oz po poPerp a b c
 
-%Obstacle Angular velocity
-fo = 4;
+%Obstacle Angular velocity (Circle Trajectory)
+foCirc = 4;
+
+%Obstacle Angular velocity (Back and Forth Trajectory)
+fo = 1;
 
 deltaFunc1 = 1;
 
@@ -237,47 +261,52 @@ deltaFunc1 = 1;
 % FeedForward
 yref = [Ox + a*sin(f*t); Oy + b*sin(f*t)*cos(f*t); Oz + c*sin(0.5*f*t)];
 
-yref_dot  = [a * f * cos(f * t); b * f * cos(2 * f * t); c * 0.5 * f * cos(0.5 * f * t)];
+yref_dot  = [a*f*cos(f*t); b*f*cos(2*f*t); c*0.5*f*cos(0.5*f*t)];
 
-yref_dd = [-a * f^2 * sin(f * t); -b * f^2 * sin(2 * f * t); -c * 0.25 * f^2 * sin(0.5 * f * t) ];
+yref_dd = [-a*f^2*sin(f*t); -b*f^2*sin(2*f*t); -c*0.25*f^2*sin(0.5*f*t)];
 
 yref = double(yref);
 yref_dot = double(yref_dot);
 yref_dd = double(yref_dd);
 
-%Obstacle 1 Mobile
-Ob1 = [- 20 + fo*t; 6; 70];
-Ob1Dot = [fo; 0; 0];
+%Obstacle 1 (Mobile)
+Ob1 = [- 20 + 30*sin(fo*t); 6; 70];
+Ob1Dot = [30*fo*cos(fo*t); 0; 0];
+Ob1DotDot = [-30*fo^2*sin(fo*t); 0; 0];
 
-Ob1DotDot = [0; 0; 0];
+%Obstacle 2 (Mobile)
+Ob2 = [30 - 30*sin(fo*t); 6; 53];
+Ob2Dot = [-30*fo*cos(fo*t); 0; 0];
+Ob2DotDot = [30*fo^2*sin(fo*t); 0; 0];
 
-Ob1 = double(Ob1);
-Ob1Dot = double(Ob1Dot);
-Ob1DotDot = double(Ob1DotDot);
+%Obstacle 3 (Mobile)
+Ob3 = [5*sin(foCirc*t); 6*cos(foCirc*t); 60];
+Ob3Dot = [5*foCirc*cos(foCirc*t); -6*foCirc*sin(foCirc*t); 0];
+Ob3DotDot = [-5*foCirc^2*sin(foCirc*t); -6*foCirc^2*cos(foCirc*t); 0];
 
-%Obstacle 2 Mobile
-Ob2 = [-40 + fo*t; 6; 53];
-Ob2Dot = [fo; 0; 0];
-
-Ob2DotDot = [0; 0; 0];
-
-Ob2 = double(Ob2);
-Ob2Dot = double(Ob2Dot);
-Ob2DotDot = double(Ob2DotDot);
-
-%Obstacle 3 Mobile
-Ob3 = [5*sin(fo*t); 6*cos(fo*t); 60];
-Ob3Dot = [5*fo*cos(fo*t); -6*fo*sin(fo*t); 0];
-Ob3DotDot = [-5*fo^2*sin(fo*t); -6*fo^2*cos(fo*t); 0];
-
-%Obstacle 4 Fixed
-Ob4 = [30; 10; 60];
+%Obstacle 4 (Fixed)
+Ob4 = [48; 3; 70];
 Ob4Dot = [0; 0; 0];
 Ob4DotDot = [0; 0; 0];
 
-Obs = [Ob1 Ob2 Ob3 Ob4];
-ObsDot = [Ob1Dot Ob2Dot Ob3Dot Ob4Dot];
-ObsDotDot = [Ob1DotDot Ob2DotDot Ob3DotDot Ob4DotDot];
+%Obstacle 5 (Fixed)
+Ob5 = [34; 3; 70];
+Ob5Dot = [0; 0; 0];
+Ob5DotDot = [0; 0; 0];
+
+%Obstacle 6 (Fixed)
+Ob6 = [19; 6; 62];
+Ob6Dot = [0; 0; 0];
+Ob6DotDot = [0; 0; 0];
+
+%Obstacle 7 (Fixed)
+Ob7 = [19; 10; 62];
+Ob7Dot = [0; 0; 0];
+Ob7DotDot = [0; 0; 0];
+
+Obs = [Ob1 Ob2 Ob3 Ob4 Ob5 Ob6 Ob7];
+ObsDot = [Ob1Dot Ob2Dot Ob3Dot Ob4Dot Ob5Dot Ob7Dot Ob7Dot];
+ObsDotDot = [Ob1DotDot Ob2DotDot Ob3DotDot Ob4DotDot Ob5DotDot Ob6DotDot Ob7DotDot];
 
 % UAV position and velocity
 Pi = x(1:3);
@@ -287,7 +316,7 @@ Pi_dot = x(4:6);
 uNominal = yref_dd + Kd*(yref_dot - Pi_dot) + Kp*(yref-Pi);
 
 % Time visualization
-t
+t;
 
 % Compute distances from obstacles
 len = size(Obs, 2);
@@ -301,12 +330,33 @@ end
 Pobs = Obs(:, index);
 PobsDot = ObsDot(:, index);
 PobsDotDot = ObsDotDot(:, index);
-dist(index) = inf; 
+dist(index) = inf;
 
-V = (Pi- Pobs);
-if(norm(V)<=r+deltaFunc1)
-     disp(norm(V))
+% Find second closest Obstacle
+[~, ind] = min(dist);
+Pobs2 = Obs(:, ind);
+ 
+% Distance from closest Obstacle
+V = Pi - Pobs;
+
+% Distance between the two closest obstacles
+l = sqrt((Pobs2 - Pobs)'*(Pobs2 - Pobs));
+
+% If robot can't fit between the two closest obstacles, consider a single obstacle that "covers" the two
+if sqrt(V'*V) < l+deltaFunc1 + 2*r && l <= 2*(r + deltaFunc1)
+    Pobs = (Pobs2 + Pobs)/2;
+    deltaFunc1 = 2*(l/2+deltaFunc1+r);
+    V = Pi - Pobs;
 end
+
+% Print if there is a collision with a obstacle
+if(norm(V)<=r+deltaFunc1)
+    t
+    disp("ALERT")
+    % disp((V))
+end
+
+
 V_dot = (Pi_dot - PobsDot);
 
 %Definition of Projection Operators
@@ -334,43 +384,31 @@ else
     u = ((-2/mu)*(po*V_dot)) + (poPerp*uNominal) + PobsDot + u_perp; %+ 2*V_inv*Pi_dot'*Ob1Dot;
 end
 
+% Controller Saturation (if needed)
+sat = 100;
+if u(1) > sat
+    u(1) = sat;
+end
 
-% % Find second closest Obstacle
-% [~, ind] = min(dist);
-% Pobs2 = Obs(:, ind);
-% 
-% % Distance from closest Obstacle
-% z = Pi - Pobs;
-% 
-% % Distance between the two closest obstacles
-% l = sqrt((Pobs2 - Pobs)'*(Pobs2 - Pobs));
-% 
-% % If robot can't fit between the two closest obstacles, consider a
-% % single obstacle that "covers" the two
-% if sqrt(z'*z) < l+d + 2*r && l <= 2*(r + d)
-%     Pobs = (Pobs2 + Pobs)/2;
-%     d = 2*(l/2+d+r);
-%     z = Pi - Pobs ;
-% end
+if u(1) < -sat
+    u(1) = -sat;
+end
 
-% % Controller Saturation (if needed)
-% sat = 20;
-% 
-% if u(1) > sat
-%     u(1) = sat;
-% end
-% 
-% if u(1) < -sat
-%     u(1) = -sat;
-% end
-% 
-% if u(2) > sat
-%     u(2) = sat;
-% end
-% 
-% if u(2) < -sat
-%     u(2) = -sat;
-% end
+if u(2) > sat
+    u(2) = sat;
+end
+
+if u(2) < -sat
+    u(2) = -sat;
+end
+
+if u(3) > sat
+    u(3) = sat;
+end
+
+if u(3) < -sat
+    u(3) = -sat;
+end
 
 % X,Y control
 Ux = u(1);
@@ -388,34 +426,3 @@ h = V'*V+mu*V'*V_dot - (deltaFunc1+r);
 % Proceed to next simulation step
 dx = A*x + B*u;
 end
-
-%% Trail generator function
-% Compute trail based on robot velocities and position, given it's radius
-% function [X1, X2, Y1, Y2, Z1, Z2]=border(X, Y, Z, X_dot, Y_dot, Z_dot)
-%     global r
-%     n = length(X);
-%     x1 = zeros(n,1);
-%     y1 = zeros(n,1);
-%     z1 = zeros(n,1);
-% 
-%     x2 = zeros(n,1);
-%     y2 = zeros(n,1);
-%     z2 = zeros(n,1);
-% 
-% 
-%     for i=2:n
-%     d = sqrt(X_dot(i)^2+Y_dot(i)^2+Z_dot(i)^2);
-%     sin_a = Y_dot(i)/d;
-%     cos_a = X_dot(i)/d;
-% 
-%     x1(i) = X(i)-r*sin_a;
-%     y1(i) = Y(i)+r*cos_a;
-% 
-%     x2(i) = X(i)+r*sin_a;
-%     y2(i) = Y(i)-r*cos_a;
-%     end
-%     X1 = x1;
-%     Y1 = y1;
-%     X2 = x2;
-%     Y2 = y2;
-% end

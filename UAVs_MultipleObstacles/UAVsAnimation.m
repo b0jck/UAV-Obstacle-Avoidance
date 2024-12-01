@@ -28,6 +28,9 @@ axis equal;
 [obs2_x, obs2_y, obs2_z] = generateSphere([Pobs2x(1), Pobs2y(1), Pobs2z(1)], d);
 [obs3_x, obs3_y, obs3_z] = generateSphere([Pobs3x(1), Pobs3y(1), Pobs3z(1)], d);
 [obs4_x, obs4_y, obs4_z] = generateSphere([Pobs4x(1), Pobs4y(1), Pobs4z(1)], d);
+[obs5_x, obs5_y, obs5_z] = generateSphere([Pobs5x(1), Pobs5y(1), Pobs5z(1)], d);
+[obs6_x, obs6_y, obs6_z] = generateSphere([Pobs6x(1), Pobs6y(1), Pobs6z(1)], d);
+[obs7_x, obs7_y, obs7_z] = generateSphere([Pobs7x(1), Pobs7y(1), Pobs7z(1)], d);
 
 robot_real = surf(robot_real_x, robot_real_y, robot_real_z, ...
     'FaceColor', [0.9290 0.6940 0.1250], 'EdgeColor', 'none', 'FaceAlpha', 0.5);
@@ -41,6 +44,12 @@ obs3= surf(obs3_x, obs3_y, obs3_z, ...
     'FaceColor', 'b', 'EdgeColor', 'none', 'FaceAlpha', 0.9);
 obs4= surf(obs4_x, obs4_y, obs4_z, ...
     'FaceColor', 'g', 'EdgeColor', 'none', 'FaceAlpha', 0.9);
+obs5= surf(obs5_x, obs5_y, obs5_z, ...
+    'FaceColor', 'g', 'EdgeColor', 'none', 'FaceAlpha', 0.9);
+obs6= surf(obs6_x, obs6_y, obs6_z, ...
+    'FaceColor', 'c', 'EdgeColor', 'none', 'FaceAlpha', 0.9);
+obs7= surf(obs7_x, obs7_y, obs7_z, ...
+    'FaceColor', 'c', 'EdgeColor', 'none', 'FaceAlpha', 0.9);
 
 % Trail (tracce) per posizione reale e di riferimento
 trail_real = plot3([], [], [], '-', 'Color', [0.9290 0.6940 0.1250], 'LineWidth', 2);
@@ -79,6 +88,15 @@ for k = 2:length(xd)
 
     [obs4_x, obs4_y, obs4_z] = generateSphere([Pobs4x(k), Pobs4y(k), Pobs4z(k)], d);
     set(obs4, 'XData', obs4_x, 'YData', obs4_y, 'ZData', obs4_z);
+
+    [obs5_x, obs5_y, obs5_z] = generateSphere([Pobs5x(k), Pobs5y(k), Pobs5z(k)], d);
+    set(obs5, 'XData', obs5_x, 'YData', obs5_y, 'ZData', obs5_z);
+
+    [obs6_x, obs6_y, obs6_z] = generateSphere([Pobs6x(k), Pobs6y(k), Pobs6z(k)], d);
+    set(obs5, 'XData', obs5_x, 'YData', obs5_y, 'ZData', obs5_z);
+
+    [obs7_x, obs7_y, obs7_z] = generateSphere([Pobs7x(k), Pobs7y(k), Pobs7z(k)], d);
+    set(obs7, 'XData', obs7_x, 'YData', obs7_y, 'ZData', obs7_z);
     
     % Aggiornamento tracce
     x_trail_real = [get(trail_real, 'XData'), xd(k)];
@@ -100,6 +118,8 @@ for k = 2:length(xd)
     
     % Genera il frame
     drawnow;
+
+    t(k)
 end
 
 %% Funzione per disegnare una sfera
