@@ -75,7 +75,7 @@ B = [   0 0 0;
 %% Closed Loop system simulation
 
 % Initial state (robot in the origin, with zero velocity)
-x0 = [10 3 60 0 0 0];
+x0 = [6 3 40 0 0 0];
 
 % Simulation time vector
 tspan=0:0.05:30;
@@ -170,12 +170,6 @@ end
 
 %% Plotting
 
-% Robot Trajectory
-figure(1)
-title('Robot Trajectory')
-xlabel('x')
-ylabel('y')
-
 % X,Y position
 X = x(:,1);
 Y = x(:,2);
@@ -186,44 +180,13 @@ X_dot = x(:,4);
 Y_dot = x(:,5);
 Z_dot = x(:,6);
 
-% Plot robot trajectory
-plot3(X,Y,Z,'color', 'b', 'LineWidth', 2)
-xlim([-15,15]);
-ylim([-15,15]);
-zlim([-15,15]);
-
-hold on
-
-
-
-% Plot Obstacles
-for i=1:size(Obs,3)
-
-    cx = Obs(1,i);
-    cy = Obs(2,i);
-    cz = Obs(3,i);
-    
-    [x, y, z] = sphere(50);
-
-    Xeff = d*x +cx;
-    Yeff = d*y +cy;
-    Zeff = d*z +cz;
-
-    surf(Xeff, Yeff, Zeff, 'FaceColor', 'r', 'EdgeColor','none');
-
-    plot3(cx,cy, cz, 'bo', 'LineWidth', 5);
-end
-
-
-% Plot Reference Trajectory
+% Reference Trajectory
 xd = cell2mat(Xd);
 yd = cell2mat(Yd);
 zd = cell2mat(Zd);
 
-plot3(xd, yd, zd, 'color', 'b', 'LineWidth', 2)
-
 % Control Effort
-figure(2)
+figure(1)
 title('Control Effort')
 xlabel('t')
 ylabel('u(t) [m/s^2]')
@@ -234,16 +197,16 @@ plot(t,ux, 'b',t, uy,'r', t, uz, 'y', 'LineWidth',2)
 yline(sat, 'k--','Label','Saturation')
 yline(-sat, 'k--','Label','Saturation')
 legend('x acceleration','y acceleration', 'z acceleration')
-% ylim([min([ux;uy])-2,max([ux;uy])+2])
+ylim([min([ux;uy;uz])-2,max([ux;uy;uz])+2])
 
-% Robot Velocity
-figure(3)
+% UAV Velocity
+figure(2)
 title('Robot Velocities')
 xlabel('t')
 ylabel('v(t) [m/s]')
-plot(t,X_dot, 'b',t, Y_dot,'r','LineWidth',2)
-legend('x velocity','y velocity')
-ylim([min([X_dot;Y_dot])-2,max([X_dot;Y_dot])+2])
+plot(t,X_dot, 'b',t, Y_dot,'r', t, Z_dot,'y', 'LineWidth',2)
+legend('x velocity','y velocity', 'z velocity')
+ylim([min([X_dot;Y_dot;Z_dot])-2,max([X_dot;Y_dot;Z_dot])+2])
 
 %% Simulation Function
 function [dx,Xd,Yd,Zd, Ux, Uy, Uz, Ob1, Ob2, Ob3, Ob4, Ob5, Ob6, Ob7, h] =simulation(t,x)
