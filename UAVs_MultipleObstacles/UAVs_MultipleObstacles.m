@@ -170,12 +170,12 @@ end
 
 %% Plotting
 
-% X,Y position
+% X,Y,Z position
 X = x(:,1);
 Y = x(:,2);
 Z = x(:,3);
 
-% X,Y velocities
+% X,Y,Z velocities
 X_dot = x(:,4);
 Y_dot = x(:,5);
 Z_dot = x(:,6);
@@ -279,7 +279,7 @@ Pi_dot = x(4:6);
 uNominal = yref_dd + Kd*(yref_dot - Pi_dot) + Kp*(yref-Pi);
 
 % Time visualization
-t;
+t
 
 % Compute distances from obstacles
 len = size(Obs, 2);
@@ -305,21 +305,14 @@ V = Pi - Pobs;
 % Distance between the two closest obstacles
 l = sqrt((Pobs2 - Pobs)'*(Pobs2 - Pobs));
 
-% If robot can't fit between the two closest obstacles, consider a single obstacle that "covers" the two
+% If UAV can't fit between the two closest obstacles, consider a single obstacle that "covers" the two
 if sqrt(V'*V) < l+deltaFunc1 + 2*r && l <= 2*(r + deltaFunc1)
     Pobs = (Pobs2 + Pobs)/2;
     deltaFunc1 = 2*(l/2+deltaFunc1+r);
     V = Pi - Pobs;
 end
 
-% Print if there is a collision with a obstacle
-if(norm(V)<=r+deltaFunc1)
-    t
-    disp("ALERT")
-    % disp((V))
-end
-
-
+% Difference between UAV and Obstacle velocities
 V_dot = (Pi_dot - PobsDot);
 
 %Definition of Projection Operators
@@ -327,6 +320,7 @@ po = V*((V'*V)^(-1))*V';
 poPerp = eye(3) - po;
 
 u_perp = 0;
+
 % Perp component
 if rank([V, Pi_dot, PobsDot],  0.1) == 1
     u_perp = ([-V(2); V(1); 0]);
@@ -373,12 +367,12 @@ if u(3) < -sat
     u(3) = -sat;
 end
 
-% X,Y control
+% X,Y, Z control effort
 Ux = u(1);
 Uy = u(2);
 Uz = u(3);
 
-% X,Y reference 
+% X,Y, Z reference 
 Xd = yref(1);
 Yd = yref(2);
 Zd = yref(3);
