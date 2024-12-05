@@ -327,44 +327,6 @@ else
     u = ((-2/mu)*(po*V_dot)) + (poPerp*uNominal) + Ob1DotDot + u_perp; %+ 2*V_inv*Pi_dot'*Ob1Dot;
 end
 
-% % Compute distances from obstacles
-% len = length(Obs);
-% dist = zeros(1, len);
-% for i=1:len
-% dist(1,i) = (Obs(:,i) - Pi)'*(Obs(:,i) - Pi);
-% end
-
-% % Find closest Obstacle
-% [~, index] = min(dist);
-% Pobs = Obs(:, index);
-% dist(index) = inf;
-
-% % Find second closest Obstacle
-% [~, ind] = min(dist);
-% Pobs2 = Obs(:, ind);
-% 
-% % Distance from closest Obstacle
-% z = Pi - Pobs;
-% 
-% % Distance between the two closest obstacles
-% l = sqrt((Pobs2 - Pobs)'*(Pobs2 - Pobs));
-% 
-% % If robot can't fit between the two closest obstacles, consider a
-% % single obstacle that "covers" the two
-% if sqrt(z'*z) < l+d + 2*r && l <= 2*(r + d)
-%     Pobs = (Pobs2 + Pobs)/2;
-%     d = 2*(l/2+d+r);
-%     z = Pi - Pobs ;
-% end
-% 
-% % Quadratic Programming optimization
-% Q = eye(2);
-% E = mu*z';
-% L = (2+alpha*mu)*(z'*Pi_dot) + mu*(Pi_dot'*Pi_dot) + alpha*(z'*z-r^2) - 8*alpha*(d+r);% + (z'*Pi_dot)/((Pobs-Pobs2)'*Pi_dot+r);
-% 
-% options = optimset('Display', 'off');
-% u = quadprog(Q, -2*U_nom, -E,L,[],[],[],[],[], options) ;
-
 % % Controller Saturation (if needed)
 sat = 10;
 
@@ -408,34 +370,3 @@ h = V'*V+mu*V'*V_dot - (deltaFunc1+r);
 % Proceed to next simulation step
 dx = A*x + B*u;
 end
-
-%% Trail generator function
-% Compute trail based on robot velocities and position, given it's radius
-% function [X1, X2, Y1, Y2, Z1, Z2]=border(X, Y, Z, X_dot, Y_dot, Z_dot)
-%     global r
-%     n = length(X);
-%     x1 = zeros(n,1);
-%     y1 = zeros(n,1);
-%     z1 = zeros(n,1);
-% 
-%     x2 = zeros(n,1);
-%     y2 = zeros(n,1);
-%     z2 = zeros(n,1);
-% 
-% 
-%     for i=2:n
-%     d = sqrt(X_dot(i)^2+Y_dot(i)^2+Z_dot(i)^2);
-%     sin_a = Y_dot(i)/d;
-%     cos_a = X_dot(i)/d;
-% 
-%     x1(i) = X(i)-r*sin_a;
-%     y1(i) = Y(i)+r*cos_a;
-% 
-%     x2(i) = X(i)+r*sin_a;
-%     y2(i) = Y(i)-r*cos_a;
-%     end
-%     X1 = x1;
-%     Y1 = y1;
-%     X2 = x2;
-%     Y2 = y2;
-% end
