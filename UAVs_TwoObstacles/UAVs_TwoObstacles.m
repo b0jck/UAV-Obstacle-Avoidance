@@ -171,19 +171,6 @@ zd = cell2mat(Zd);
 
 plot3(xd, yd, zd, 'color', 'b', 'LineWidth', 2)
 
-
-% Extract robot's "trail"
-%[X1, X2, Y1, Y2, Z1, Z2] = border(X,Y,Z,X_dot, Y_dot,Z_dot);
-
-% Plot the two curves that define the trail
-% plot3(X1, Y1, Z1, 'b', 'LineWidth', 1);
-% plot3(X2, Y2, Z2, 'b', 'LineWidth', 1);
-
-% Fill area in between
-% for i=2:length(X1)
-%     plot3([X1(i) X2(i)], [Y1(i) Y2(i)], [Z1(i) Z2(i)], 'b', 'LineWidth', 0.1)
-% end
-
 % Control Effort
 figure(2)
 title('Control Effort')

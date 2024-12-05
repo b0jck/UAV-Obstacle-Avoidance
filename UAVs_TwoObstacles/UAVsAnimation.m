@@ -123,7 +123,12 @@ for k = 2:length(xd)
                   'UData', X_dot(k), 'VData', Y_dot(k), 'WData', Z_dot(k));
     
     % Aggiornamento testo della velocità
-    set(v_text, 'Position', [X(k), Y(k), Z(k) + 1], 'String', num2str(vel(k)));
+    cbf = H(k);
+    clr = [0 0 0];
+    if cbf <= 0
+        clr = [1 0 0];
+    end
+    set(v_text, 'Position', [X(k), Y(k), Z(k) + 1], 'String', num2str(cbf), 'Color', clr);
 
     xlim([xmin, xmax]);
     ylim([ymin, ymax]);
