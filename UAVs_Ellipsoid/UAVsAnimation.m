@@ -23,9 +23,9 @@ figure;
 set(gcf, 'Units', 'Normalized', 'OuterPosition', [0, 0, 1, 1]);
 
 % Limiti del grafico
-xmin = -20; xmax = 20;
-ymin = -20; ymax = 20;
-zmin = 0; zmax = 20;
+xmin = -20; xmax = 30;
+ymin = -15; ymax = 20;
+zmin = 0; zmax = 90;
 
 xlim([xmin, xmax]);
 ylim([ymin, ymax]);
@@ -51,8 +51,9 @@ obs1 = surf(obs1_x, obs1_y, obs1_z, ...
     'FaceColor', 'r', 'EdgeColor', 'none', 'FaceAlpha', 0.9);
 
 % Trail (tracce) per posizione reale e di riferimento
-trail_real = plot3([], [], [], '-', 'Color', [0.9290 0.6940 0.1250], 'LineWidth', 2);
-trail_ref = plot3([], [], [], '-', 'Color', [0 0.5 1], 'LineWidth', 2);
+trail_real = line('XData', [], 'YData', [], 'ZData', [], 'Color', [0.9290 0.6940 0.1250], 'LineWidth', 3);
+trail_ref = line('XData', [], 'YData', [], 'ZData', [], 'Color', [0 0.5 1], 'LineWidth', 3);
+trail_obs = line('XData', [], 'YData', [], 'ZData', [], 'Color', [0.9 0 0], 'LineWidth', 3,'LineStyle',':');
 
 % Freccia della velocità
 v_vector = quiver3(X(1), Y(1), Z(1), X_dot(1), Y_dot(1), Z_dot(1), ...
@@ -63,7 +64,7 @@ vel = sqrt(X_dot.^2 + Y_dot.^2 + Z_dot.^2);
 v_text = text(X(1), Y(1), Z(1) + 1, num2str(vel(1)), 'FontSize', 14, 'Color', 'k');
 
 hold on;
-plot3(xd,yd,zd,'color', 'b', 'LineWidth', 2)
+plot3(xd,yd,zd, 'c--', 'LineWidth', 1.5)
 
 %% Animazione
 for k = 2:length(xd)
@@ -89,6 +90,11 @@ for k = 2:length(xd)
     y_trail_ref = [get(trail_ref, 'YData'), Y(k)];
     z_trail_ref = [get(trail_ref, 'ZData'), Z(k)];
     set(trail_ref, 'XData', x_trail_ref, 'YData', y_trail_ref, 'ZData', z_trail_ref);
+
+    x_trail_obs = [get(trail_obs, 'XData'), Pobs1x(k)];
+    y_trail_obs = [get(trail_obs, 'YData'), Pobs1y(k)];
+    z_trail_obs = [get(trail_obs, 'ZData'), Pobs1z(k)];
+    set(trail_obs, 'XData', x_trail_obs, 'YData', y_trail_obs, 'ZData', z_trail_obs);
     
     % Aggiornamento velocità
     set(v_vector, 'XData', X(k), 'YData', Y(k), 'ZData', Z(k), ...
@@ -97,6 +103,10 @@ for k = 2:length(xd)
     % Aggiornamento testo della velocità
     set(v_text, 'Position', [X(k), Y(k), Z(k) + 1], 'String', num2str(vel(k)));
     
+    xlim([xmin, xmax]);
+    ylim([ymin, ymax]);
+    zlim([zmin, zmax]);
+
     % Genera il frame
     drawnow;
 end
