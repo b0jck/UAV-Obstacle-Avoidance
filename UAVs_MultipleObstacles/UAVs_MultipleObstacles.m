@@ -53,7 +53,7 @@ d1 = 3;
 r = 5;
 
 % Controller saturation
-sat = 20;
+sat = 100;
 
 %% System Dynamics' Matrices
 
