@@ -2,7 +2,7 @@
 
 This project involves Unmanned Aerial Vehicle (UAV) control to ensure Trajectory Tracking and Obstacle Avoidance using Control Barrier Functions.
 More info on the mathematical model and control technique can be found in the [report](Report.pdf).
-A video of the simulations is available at this [link](https://youtu.be/bqyiTBsz_MI)
+A video of the Matlab Animation is available at this [link](https://youtu.be/bqyiTBsz_MI). A renderization of the silmulation made with SImulink and Unreal Engine is also available at this [link](https://youtu.be/Eob2qzw_-Bo)
 
 The work done is generalizable to any scenario, with any given reference trajectory and set of obstacles (both static and dynamic). However, four scenarios were considered and are available for download in each folder of this repository.
 
