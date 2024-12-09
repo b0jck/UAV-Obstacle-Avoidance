@@ -5,7 +5,7 @@ clc
 % Use global Parameters to simplify simulation
 global A B K Kp Kd mu d d1 f Ox Oy R Obs alpha dt Ak Hk Pk Jk Qk xk i
 
-global Pd Xd Yd Zd Pd_dot Xd_dot Yd_dot Zd_dot Pd_dd s r a b Ox Oy Oz Ux Uy Uz Ob1 Ob2 H Ob1_pred Ob1Dot_pred 
+global Pd Xd Yd Zd Pd_dot Xd_dot Yd_dot Zd_dot Pd_dd s r Ox Oy Oz Ux Uy Uz Ob1 Ob2 H Ob1_pred Ob1Dot_pred Ob1DotDot_pred
 syms Pd Xd Yd Zd Pd_dot Xd_dot Yd_dot Zd_dot Pd_dd s
 
 %% Trajectory Parameters (for feedforward)
@@ -13,10 +13,6 @@ syms Pd Xd Yd Zd Pd_dot Xd_dot Yd_dot Zd_dot Pd_dd s
 Ox = 20;
 Oy = 3;
 Oz = 20;
-
-% Ellipse's axes
-a = 20;
-b = 10;
 
 % Angular velocity (in Rad/s)
 f = pi/4;
@@ -59,7 +55,7 @@ d1 = 5;
 r = 1;
 
 % Controller saturation
-sat = 100;
+sat = 40;
 
 %% System Dynamics' Matrices
 
@@ -80,7 +76,7 @@ B = [   0 0 0;
 
 %% Closed Loop system simulation
 
-% Initial state (robot in the origin, with zero velocity)
+% Initial state 
 x0 = [20 3 20 0 0 0];
 
 % Simulation time vector
@@ -88,30 +84,34 @@ tspan=0:0.05:30;
 
 %% Kalman Filter
 %Setup Kalman Filter
-dt = 0.05;  % Sampling time
-Qk = diag([0.01, 0.01, 0.01, 0.1, 0.1, 0.1]);  % Process Covariance
+dt = 0.05;  % Sampling interval
+Qk = diag([0.01, 0.01, 0.01, 0.1, 0.1, 0.1, 0.5, 0.5, 0.5]);  % Process Covariance
 Jk = diag([0.05, 0.05, 0.05]);  % Measurements Covariance
 
 % Transition Matrix 
-omega_dt = f * dt; % Termine della velocità angolare
-Ak = [1, 0, 0, dt, 0, 0;
-     0, 1, 0, 0, dt, 0;
-     0, 0, 1, 0, 0, dt;
-     0, 0, 0, 1, 0, 0;
-     0, 0, 0, 0, 1, 0;
-     0, 0, 0, 0, 0, 1];
+Ak = [1, 0, 0, dt, 0, 0, dt^2/2, 0, 0;
+     0, 1, 0, 0, dt, 0, 0, dt^2/2, 0;
+     0, 0, 1, 0, 0, dt, 0, 0, dt^2/2;
+     0, 0, 0, 1, 0, 0, dt, 0, 0;
+     0, 0, 0, 0, 1, 0, 0, dt, 0;
+     0, 0, 0, 0, 0, 1, 0, 0, dt;
+     0, 0, 0, 0, 0, 0, 1, 0, 0;
+     0, 0, 0, 0, 0, 0, 0, 1, 0;
+     0, 0, 0, 0, 0, 0, 0, 0, 1];
+
 
 
 % Observation matrix
-Hk = [1, 0, 0, 0, 0, 0;
-     0, 1, 0, 0, 0, 0;
-     0, 0, 1, 0, 0, 0];
+Hk = [1, 0, 0, 0, 0, 0, 0, 0, 0;
+     0, 1, 0, 0, 0, 0, 0, 0, 0;
+     0, 0, 1, 0, 0, 0, 0, 0, 0];
+
 
 % Initialization
-x0k = [0; 10; 20; 0; 0; 0];  % initial state
-Pk = eye(6);       % initial covariance
+x0k = [0; 10; 20; 0; 0; 0; 0; 0; 0];  % initial state (OB Pos, Vel, Acc)
+Pk = eye(9);       % initial covariance
 
-xk = zeros(6, length(tspan));
+xk = zeros(9, length(tspan));
 xk(:,1) = x0k;
 
 % Parameter for Kalman Filter
@@ -181,7 +181,7 @@ ylim([min([X_dot;Y_dot;Z_dot])-2,max([X_dot;Y_dot;Z_dot])+2])
 
 figure(3)
 T = [0 tspan];
-subplot(2,1,1)
+subplot(2,1,2)
 plot(T,xk(4,:) , 'r', T, xk(5,:), 'y', T, xk(6,:), 'b', 'Linewidth', 2)
 title('Estimated velocity of the obstacle');
 xlabel('t');
@@ -189,7 +189,7 @@ ylabel('v(t) [m/s]');
 legend('x estimated velocity','y estimated velocity', 'z estimated velocity')
 grid on;
 
-subplot(2, 1, 2); 
+subplot(2, 1, 1); 
 plot(T, 10*f*cos(f*T), 'r', T, -10*f*sin(f*T), 'y', T, 0*ones(length(T)), 'b', 'Linewidth', 2);
 title('Real velocity of the obstacle');
 xlabel('t');
@@ -197,9 +197,27 @@ ylabel('v(t) [m/s]');
 legend('x real velocity','y real velocity', 'z real velocity')
 grid on;
 
+figure(4)
+T = [0 tspan];
+subplot(2,1,2)
+plot(T,xk(7,:) , 'r', T, xk(8,:), 'y', T, xk(9,:), 'b', 'Linewidth', 2)
+title('Estimated acceleration of the obstacle');
+xlabel('t');
+ylabel('a(t) [m/s^2]');
+legend('x estimated acceleration','y estimated acceleration', 'z estimated acceleration')
+grid on;
+
+subplot(2, 1, 1); 
+plot(T, -10*f^2*sin(f*T), 'r', T, -10*f^2*cos(f*T), 'y', T, 0*ones(length(T)), 'b', 'Linewidth', 2);
+title('Real acceleration of the obstacle');
+xlabel('t');
+ylabel('a(t) [m/s^2]');
+legend('x real acceleration','y real acceleration', 'z real acceleration')
+grid on;
+
 %% Simulation Function
 function [dx,Xd,Yd,Zd, Ux, Uy, Uz, Ob1, h] =simulation(t,x)
-global A B Pd Pd_dot Pd_dd s Kp Kd Obs mu alpha r a b f Ox Oy Oz po poPerp dt Ak Hk Pk Jk Qk xk i Ob1_pred Ob1Dot_pred Ob1Dot
+global A B Pd Pd_dot Pd_dd s Kp Kd Obs mu alpha r a b f Ox Oy Oz po poPerp dt Ak Hk Pk Jk Qk xk i Ob1_pred Ob1Dot_pred Ob1DotDot_pred Ob1Dot
 
 deltaFunc1 = 2;
 
@@ -230,12 +248,13 @@ Kk = P_pred * Hk' / Sk;
 
 xk(:,i+1) = x_pred + Kk * yk;  
 
-Pk = (eye(6) - Kk * Hk) * P_pred;  
+Pk = (eye(9) - Kk * Hk) * P_pred;  
 
 % Estimated Position and velocity 
 xkk=xk(:,i);
 Ob1_pred = double(xkk(1:3));  
 Ob1Dot_pred = double(xkk(4:6));  
+Ob1DotDot_pred = double(xkk(7:9));
 
 % Real position, velocity and acceleration of the obstacle
 Ob1 = [10*sin(f*t); 10*cos(f*t); 20];
@@ -270,7 +289,7 @@ if rank([V, Pi_dot, x(4:6)],  0.1) == 1
 end
     
 %Definition of CBF
-h1 = V' * (mu*uNominal + 2*V_dot - mu*Ob1DotDot);
+h1 = V' * (mu*uNominal + 2*V_dot - mu*Ob1DotDot_pred);
 h2 = (V'*V + mu*V'*V_dot);
 gamma = 12;
 
@@ -278,7 +297,7 @@ gamma = 12;
 if h1>0 || h2>deltaFunc1+(r*gamma)
     u = uNominal;
 else
-    u = ((-2/mu)*(po*V_dot)) + (poPerp*uNominal) + Ob1DotDot + u_perp; %+ 2*V_inv*Pi_dot'*Ob1Dot;
+    u = ((-2/mu)*(po*V_dot)) + (poPerp*uNominal) + Ob1DotDot_pred + u_perp; %+ 2*V_inv*Pi_dot'*Ob1Dot;
 end
 
 
@@ -290,31 +309,31 @@ Zd = yref(3);
 % CBF evaluation index
 h = V'*V+mu*V'*V_dot - (deltaFunc1+r);
 
-% % Controller Saturation (if needed)
-% sat = 100;
-% if u(1) > sat
-%     u(1) = sat;
-% end
-% 
-% if u(1) < -sat
-%     u(1) = -sat;
-% end
-% 
-% if u(2) > sat
-%     u(2) = sat;
-% end
-% 
-% if u(2) < -sat
-%     u(2) = -sat;
-% end
-% 
-% if u(3) > sat
-%     u(3) = sat;
-% end
-% 
-% if u(3) < -sat
-%     u(3) = -sat;
-% end
+% Controller Saturation (if needed)
+sat = 40;
+if u(1) > sat
+    u(1) = sat;
+end
+
+if u(1) < -sat
+    u(1) = -sat;
+end
+
+if u(2) > sat
+    u(2) = sat;
+end
+
+if u(2) < -sat
+    u(2) = -sat;
+end
+
+if u(3) > sat
+    u(3) = sat;
+end
+
+if u(3) < -sat
+    u(3) = -sat;
+end
 
 % X,Y,Z control
 Ux = u(1);
