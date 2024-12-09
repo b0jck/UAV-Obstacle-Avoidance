@@ -13,7 +13,7 @@ The files in each folder include:
 - A main Simulink animation file (Quadcopter.sxl)
 ** WARNING: ** The Simulink animation can only run with an Unreal Engine Plugin (follow Simulink Guide). Moreover, **such plugin is currently not available for MacOS.** Matlab files are compatible with any hardware.
 
-** FOLDERS' GUIDE **
+**FOLDERS GUIDE**
 For all folders, run the simulation script first and then the animation (either Matlab or Simulink).
 ## UAVs_TwoObstacles
 In this simulation it is assigned an elicoidal trajectory with two obstacles traveling on a straight line.
