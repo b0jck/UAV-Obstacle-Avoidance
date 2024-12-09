@@ -1,7 +1,12 @@
-# UAV-CBF
+# UAV Trajectory Tracking and Obstacle Avoidance via Control Barrier Functions
 
-UAV obstacle avoidance via Control Barrier Functions
+This project involves Unmanned Aerial Vehicle (UAV) control to ensure Trajectory Tracking and Obstacle Avoidance using Control Barrier Functions.
+More info on the mathematical model and control technique can be found in the [report](report_UAV.pdf).
 
+The work done is generalizable to any scenario, with any given reference trajectory and set of obstacles (both static and dynamic). However, four scenarios were considered and are available for download in each folder of this repository.
+
+The files in each folder include:
+- A
 **IDEA:**
 Si runna UAV.m e si lascia il workspace intatto. Poi si apre la scena simulink e si clicca play, cosi tutte le posizione sono già state calcolate.
 ## sampler.slx
