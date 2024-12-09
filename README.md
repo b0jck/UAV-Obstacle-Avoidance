@@ -2,17 +2,33 @@
 
 This project involves Unmanned Aerial Vehicle (UAV) control to ensure Trajectory Tracking and Obstacle Avoidance using Control Barrier Functions.
 More info on the mathematical model and control technique can be found in the [report](report_UAV.pdf).
+A video of the simulations is available at this [link](youtube.com)
 
 The work done is generalizable to any scenario, with any given reference trajectory and set of obstacles (both static and dynamic). However, four scenarios were considered and are available for download in each folder of this repository.
 
 The files in each folder include:
-- A
-**IDEA:**
-Si runna UAV.m e si lascia il workspace intatto. Poi si apre la scena simulink e si clicca play, cosi tutte le posizione sono già state calcolate.
-## sampler.slx
-Questi blocchi (sampler) sono fatti per estrarre uno alla volta (1 per ogni istante di tempo) le posizioni di robot e ostacolo. L'uscita dei blocchi è un vettore (x(t), y(t), z(t)) che va dato in pasto a translation degli oggetti. Vanno copiati e aggiunti alla scena simulink di animazione.
+- A main Matlab simulation file (ex. UAVs_XXX.m)
+- A main Matlab Animation file (ex. UAVsAnimation.m)
+- A "workspace" file used for simulink animation (quadcopter.mat)
+- A main Simulink animation file (Quadcopter.sxl)
+** WARNING: ** The Simulink animation can only run with an Unreal Engine Plugin (follow Simulink Guide). Moreover, **such plugin is currently not available for MacOS.** Matlab files are compatible with any hardware.
 
-## TODO:
-- Aggiungere i sampler, per il momento anche solo del drone e provare a vedere se si muove nell'animazione.
-  **IMPORTANTE:** Mettere lo stop time (tempo di simulazione in simulink) uguale a quello che abbiamo usato in Matlab (quello di tspan)
-- Creare un'altro oggetto per simulare l'ostacolo. Per il momento una sfera va bene. Ci dovrebbe essere una primitiva per farlo facilmente
+** FOLDERS' GUIDE **
+For all folders, run the simulation script first and then the animation (either Matlab or Simulink).
+## UAVs_TwoObstacles
+In this simulation it is assigned an elicoidal trajectory with two obstacles traveling on a straight line.
+
+## UAVs_NoFeasible
+In this simulation it is assigned a trajectory made of straight lines with 90° sharp angles. It shows that the simplified model allows track unfeasible trajectory for the real UAV.
+## UAVs_Straight
+In this simulation the obstacle and the UAV travel in opposite directions on a line. It is a singular case for the methodology in use, but the singularity is avoided with an "escape maneuver" (more info in the [report](report_UAV.pdf)).
+## UAVs_MultipleObstacles
+In this simulation it is assigned a complex trajectory and the UAV navigates through both fixed and moving obstacles. It is the most challenging scenario of all the above.
+
+## UAVs_KALMAN
+In this simulation the control law is based only on exact measurements of the obstacle's position. Velocity and acceleration of the obstacle are instead estimated by an implemented Kalman Filter.
+
+
+
+
+
